@@ -1,0 +1,71 @@
+# Author: Rémi Venant, <remi.venant@univ-lemans.fr>
+name: 'moodle-on-docker'
+
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db-root-pwd
+      MARIADB_USER: moodleusr
+      MARIADB_PASSWORD_FILE: /run/secrets/db-user-pwd
+      MARIADB_DATABASE: moodle
+    volumes:
+      - db-data:/var/lib/mysql
+    secrets:
+      - db-root-pwd
+      - db-user-pwd
+    networks:
+      - moodle-net
+    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mariadb-admin -uroot -p$${MARIADB_ROOT_PASSWORD} -h localhost ping",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  worker:
+    image: teatime/moodle
+    build:
+      context: ./worker
+      args:
+        - http_proxy=${HTTP_PROXY:-}
+        - https_proxy=${HTTPS_PROXY:-}
+        - no_proxy=${NO_PROXY:-}
+    depends_on:
+     db:
+       condition: service_healthy
+    configs:
+      - source: worker_php_config
+        target: /usr/local/etc/php/php.ini
+        mode: 0440
+    volumes:
+      - web-content:/var/www/html
+      - web-data:/var/www/moodledata
+    networks:
+      - moodle-net
+    ports:
+      - "127.0.0.1:80:80"
+    restart: always
+
+networks:
+  moodle-net:
+
+volumes:
+  db-data:
+  web-content:
+  web-data:
+
+configs:
+  worker_php_config:
+    file: ./worker/worker_php.ini
+
+secrets:
+  db-root-pwd:
+    file: ./secrets/db-root-pwd.pwd
+  db-user-pwd:
+    file: ./secrets/db-user-pwd.pwd
