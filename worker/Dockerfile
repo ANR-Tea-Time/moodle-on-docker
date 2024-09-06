@@ -15,35 +15,40 @@ RUN test -z "${http_proxy}" || pear config-set http_proxy ${http_proxy}
 # Installation Package système requis pour les extensions php
 RUN apt-get update \
   && apt-get install -y \
-    cron \
-    git \
-    libicu-dev \
-    libzip-dev \
-    unzip \ 
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    libpng-dev \
-    libcurl3-dev \
-# Reconfiguration de php gd
+  cron \
+  git \
+  libicu-dev \
+  libzip-dev \
+  unzip \
+  libfreetype6-dev \
+  libjpeg62-turbo-dev \
+  libpng-dev \
+  libcurl3-dev \
+  libxml2-dev \
+  libtidy-dev \
+  # Reconfiguration de php gd
   && docker-php-ext-configure gd --with-freetype --with-jpeg \
-# Installation des extenstions gérées par pecl
+  # Installation des extenstions gérées par pecl
   && pecl install apcu \
-# Installation des extensions gérées par php-ext-install
+  # Installation des extensions gérées par php-ext-install
   && docker-php-ext-install -j$(nproc) \
-    intl \
-    opcache \
-    zip \
-    gd \
-    curl \
-    mysqli pdo_mysql \
-# Activation d'extensions php
+  intl \
+  opcache \
+  zip \
+  gd \
+  curl \
+  mysqli pdo_mysql \
+  soap \
+  exif \
+  tidy \
+  # Activation d'extensions php
   && docker-php-ext-enable \
-    intl \
-    opcache \
-    apcu \
-    zip \
-    mysqli pdo_mysql \
-    gd
+  intl \
+  opcache \
+  apcu \
+  zip \
+  mysqli pdo_mysql \
+  gd
 
 #  Configuration git global et création structures de dossier
 RUN mkdir -p /var/www/moodledata \
