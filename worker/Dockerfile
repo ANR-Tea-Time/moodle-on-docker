@@ -64,7 +64,7 @@ RUN  chown -R www-data:www-data /var/www \
   && chmod 0777 /var/www/moodledata
 
 # Installation du cron pour www-data
-RUN echo "* * * * * /usr/bin/php  /app/moodle/admin/cli/cron.php" > current_cron \
+RUN echo "* * * * * /usr/local/bin/php  /var/www/html/admin/cli/cron.php" > current_cron \
   && crontab -u www-data current_cron \
   && rm current_cron
 
