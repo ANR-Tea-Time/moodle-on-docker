@@ -64,9 +64,9 @@ RUN  chown -R www-data:www-data /var/www \
   && chmod 0777 /var/www/moodledata
 
 # Installation du cron pour www-data
-RUN echo "* * * * * /usr/local/bin/php  /var/www/html/admin/cli/cron.php" > current_cron \
-  && crontab -u www-data current_cron \
-  && rm current_cron
+RUN echo "* * * * * su www-data -s /bin/sh -c '/usr/local/bin/php /var/www/html/admin/cli/cron.php' > /proc/1/fd/1 2>/proc/1/fd/2" > /etc/cron.d/moodle-crontab \
+  && chmod 0644 /etc/cron.d/moodle-crontab \
+  && crontab -u root /etc/cron.d/moodle-crontab
 
 # Nettoyage,
 RUN rm -rf /var/lib/apt/lists/* && rm -rf /tmp/*
@@ -79,3 +79,7 @@ VOLUME /var/www/html /var/www/moodledata
 
 # Command de départ: le superviseur
 CMD ( cron -f & ) && apache2-foreground
+
+# Si l'on veut séparer le cron et le worker lui-même:
+# - 1 conteneur avec la commande apache2-foreground
+# - 1 conteneur avec la command ["cron", "-f"]
