@@ -35,7 +35,10 @@ services:
     image: teatime/moodle
     build:
       context: ./worker
+      tags:
+        - teatime/moodle:8.0.5
       args:
+        - MOODLE_VERSION=405
         - http_proxy=${HTTP_PROXY:-}
         - https_proxy=${HTTPS_PROXY:-}
         - no_proxy=${NO_PROXY:-}
