@@ -68,6 +68,9 @@ RUN echo "* * * * * su www-data -s /bin/sh -c '/usr/local/bin/php /var/www/html/
   && chmod 0644 /etc/cron.d/moodle-crontab \
   && crontab -u root /etc/cron.d/moodle-crontab
 
+# Activation de module apache
+RUN a2enmod rewrite
+
 # Nettoyage,
 RUN rm -rf /var/lib/apt/lists/* && rm -rf /tmp/*
 
